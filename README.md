@@ -212,7 +212,7 @@ The $SCAV$ is the integral of the absolute value of the accelerogram computed ov
 
 A conceptual sketch and the corresponding equations are illustred here:
 
-![](IMGReadme/cav.png)
+![](IMGReadme/CAV.png)
 
 ### The Arias intensity and the  Husid duration
 
