@@ -31,7 +31,7 @@ class Object(object):
     pass
 
 class mytools:
-    
+
     def read_knet(self,filename):
         tr = Object()
         tr.stats = Object()
@@ -135,8 +135,31 @@ class mytools:
         return tr
         
 
-
-
+    def read_peer(self,filename):
+        tr = Object()
+        tr.stats = Object()
+        tr.stats.sac = Object()
+        tr.hdr = Object()
+        amp = []
+        with open(filename) as ff:
+            for ii,line in enumerate(ff):
+                line = line.rstrip("\n")
+                tr.stats.network = "PEER"
+                tr.stats.location = "Unknown"
+                if ii==1:
+                    tr.hdr.evname = line.split(",")[0]
+                    stname = line.split(",")[2].split()
+                    tr.stats.station = "".join(stname)
+                    tr.stats.channel = line.split(",")[3].split()[0]
+                if ii==3:
+                    tr.stats.delta = np.float(line.split()[3])
+                if ii>3:
+                    val = line.split()
+                    for ele in val:
+                        amp.append(ele)
+                tr.stats.npts = len(np.array(amp))
+                tr.data = amp
+        return tr
 
     def read_orfeus(self,filename):
         tr = Object()
