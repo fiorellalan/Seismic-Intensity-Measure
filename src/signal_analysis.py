@@ -152,7 +152,7 @@ class mytools:
                     tr.stats.station = "".join(stname)
                     tr.stats.channel = line.split(",")[3].split()[0]
                 if ii==3:
-                    tr.stats.delta = np.float(line.split()[3])
+                    tr.stats.delta = float(line.split()[3])
                 if ii>3:
                     val = line.split()
                     for ele in val:
@@ -183,7 +183,7 @@ class mytools:
                 elif ii==5:
                     tr.hdr.evlo = line.split()[1]
                 elif ii==6:
-                    tr.hdr.evdp = np.float(line.split()[1])
+                    tr.hdr.evdp = float(line.split()[1])
                 elif ii==8:
                     try:
                         tr.hdr.mw = line.split()[1]
@@ -227,15 +227,15 @@ class mytools:
                 elif ii==22:
                      tr.stats.sclass =  line.split()[1]
                 elif ii==24:
-                     tr.stats.epi =  np.float(line.split()[1])
+                     tr.stats.epi =  float(line.split()[1])
                 elif ii==28:
-                    tr.stats.delta =  np.float(line.split()[1])
+                    tr.stats.delta =  float(line.split()[1])
                 elif ii==29:
-                    tr.stats.npts =  np.float(line.split()[1])
+                    tr.stats.npts =  float(line.split()[1])
                 elif ii==31:
                     tr.stats.channel = line.split()[1]
                 if ii>=64:
-                    amp.append(np.float(line))
+                    amp.append(float(line))
         amp = np.array(amp)
         tr.data = amp
         return tr 
@@ -279,8 +279,8 @@ class mytools:
             if key == "base":    option = kwargs[key]
 
         # cut
-        cut_beg = np.int(np.ceil(cutmin/delta))
-        cut_end = np.int(np.floor(cutmax/delta))
+        cut_beg = int(np.ceil(cutmin/delta))
+        cut_end = int(np.floor(cutmax/delta))
         #print (cutmin,cutmax,cut_beg,cut_end)
         
         acc = acc[cut_beg:cut_end]
@@ -398,8 +398,8 @@ class mytools:
             if key == "cutmax":  cutmax = kwargs[key]
         
         # cut
-        cut_beg = np.int(np.ceil(cutmin/delta))
-        cut_end = np.int(np.floor(cutmax/delta))
+        cut_beg = int(np.ceil(cutmin/delta))
+        cut_end = int(np.floor(cutmax/delta))
         print (cutmin,cutmax,cut_beg,cut_end)
         
         vel = vel[cut_beg:cut_end]
@@ -426,8 +426,8 @@ class mytools:
         #amp = signal.detrend(tamp_pad)
         #famp = bandpass(tamp_pad,fmin,fmax,df,corners=npoles,zerophase=True)
     
-        #beg = np.int(np.ceil(40./delta))
-        #end = np.int()
+        #beg = np.int32(np.ceil(40./delta))
+        #end = np.int32()
         """
         vel = sp.cumsum(famp)*delta
      
@@ -557,15 +557,15 @@ class mytools:
 
         # standardized CAV 
         t0   = 1.0                                        # time window for check
-        nw   = int(np.floor(len(acc)*self.delta/t0));     # number of windows
-        ns   = int(np.ceil(t0/self.delta));               # npts in each time window
+        nw   =int(np.floor(len(acc)*self.delta/t0));     # number of windows
+        ns   =int(np.ceil(t0/self.delta));               # npts in each time window
 
         scav = 0;
         scavtime  = np.zeros(int(nw*ns));
         for ii in range(1,nw):
             w    = [];
-            imin = int((ii-1)*ns+1);
-            imax = int(ii*ns+1);
+            imin =int((ii-1)*ns+1);
+            imax =int(ii*ns+1);
             if imax < len(acc):
                 maxw = np.max(np.abs(acc[imin:imax]))
                 if maxw >= 0.025:
@@ -645,7 +645,7 @@ class mytools:
             vmax = 0.0
             elle = 1.0
             if dp[j]<self.delta: 
-                elle = int(self.delta/dp[j]+1.0 - 0.00001)
+                elle =int(self.delta/dp[j]+1.0 - 0.00001)
             dtl = self.delta/elle
             omega = 2*np.pi/per[j]
             w2 = omega**2
@@ -747,19 +747,20 @@ class mytools:
         delta = self.delta
         fny = 1/(2*delta)
         df = 1/(tempo[-1]-tempo[0])
-        nfreq = int(fny/df)
+        nfreq =int(fny/df)
         
         print ("Nyquist", fny)
         while fny > 25:
             data,tempo=sp.signal.resample(data,int(len(data)/2),t=tempo)
             delta =  tempo[1]-tempo[0]
             fny = (1./(2*delta))
-            nfreq = int(fny/df)
+            nfreq =int(fny/df)
             df = 1/(tempo[-1]-tempo[0])
             print ("Nyquist", fny)
 
         fmin = df
-        low = int(fmin/df) 
+        low =int(fmin/df) 
+        print ("low", fmin/df,low)
             
         stock = st.st(data,low,nfreq)
         stock = np.flipud(stock)
@@ -785,6 +786,10 @@ class mytools:
 
     def read_gmpeinput (self):
         from openquake.hazardlib import gsim, imt
+        from openquake.hazardlib.contexts import SitesContext, RuptureContext, DistancesContext
+        from openquake.hazardlib.site import SiteCollection
+        from openquake.hazardlib.source.rupture import BaseRupture
+
 
         
         
@@ -802,26 +807,27 @@ class mytools:
             
         Rhypo = np.sqrt(self.Epi**2+self.depth**2)
         
-        sites = gsim.base.SitesContext()
-        rupture = gsim.base.RuptureContext()
-        distances = gsim.base.DistancesContext()   
+        sites = SitesContext()
+        rupture = RuptureContext()
+        distances = DistancesContext()   
                 
-        setattr(sites,'vs30', np.array([np.float(self.vs30)]))
-        setattr(sites,'z2pt5',np.array([np.float(z2pt5)]))
-        setattr(sites,'z1pt0',np.array([np.float(z1pt0)]))
+        setattr(sites,'vs30', np.array([float(self.vs30)]))
+        setattr(sites,'z2pt5',np.array([float(z2pt5)]))
+        setattr(sites,'z1pt0',np.array([float(z1pt0)]))
         setattr(sites,'vs30measured', np.array([0]) )
+        setattr(sites,'sids',np.arange(1))
                 
         setattr(rupture,'rake',self.rake) 
-        setattr(rupture,'dip',np.float(self.dip))
+        setattr(rupture,'dip',float(self.dip))
                 
-        setattr(rupture,'mag',       np.array([np.float(self.mag)]))
-        setattr(rupture,'ztor',      np.array([np.float(self.ztor)]))
-        setattr(rupture,'hypo_depth',np.array([np.float(self.depth)]))
+        setattr(rupture,'mag',       np.array([float(self.mag)]))
+        setattr(rupture,'ztor',      np.array([float(self.ztor)]))
+        setattr(rupture,'hypo_depth',np.array([float(self.depth)]))
 
-        setattr(distances,'rhypo',np.array([np.float(Rhypo)]))
-        setattr(distances,'rjb',  np.array([np.float(self.Rjb)]))
-        setattr(distances,'rrup', np.array([np.float(self.Rrup)]))
-        setattr(distances,'rx',   np.array([np.float(self.Rx)]))
+        setattr(distances,'rhypo',np.array([float(Rhypo)]))
+        setattr(distances,'rjb',  np.array([float(self.Rjb)]))
+        setattr(distances,'rrup', np.array([float(self.Rrup)]))
+        setattr(distances,'rx',   np.array([float(self.Rx)]))
 
         #decomment to check in input
         #print ("Vs30",sites.vs30, "Z2500",sites.z2pt5, "Z1000", sites.z1pt0, "FlagVs30",sites.vs30measured)

@@ -23,7 +23,7 @@
 import os
 
 from obspy import read, read_inventory, UTCDateTime
-from matplotlib.patches import Rectangle
+#from matplotlib.patches import Rectangle
 from obspy.signal import invsim
 from scipy.signal import welch
 from obspy import Stream
